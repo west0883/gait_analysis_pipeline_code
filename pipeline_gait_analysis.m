@@ -351,3 +351,9 @@ parameters.loop_list.things_to_save.concatenated_data.variable = {'stride_segmen
 parameters.loop_list.things_to_save.concatenated_data.level = 'mouse';
 
 RunAnalysis({@ConcatenateData}, parameters);
+
+%% 
+% (need a way to get the OVERALL velocity segmented into strides, too. Need to have 
+% the long periods overall velocity saved somewhere, as well. Mostly for motorized walk)
+
+%% 
