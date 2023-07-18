@@ -47,40 +47,58 @@ function [parameters] = FindStrides(parameters)
     %
     if parameters.instancesAsCells
         % If true, for continued walk long periods
+        peak_heights= cell(numel(data), 1); 
         peak_indices = cell(numel(data), 1); 
-        segments_all = cell(numel(data), 1); 
+        depression_heights= cell(numel(data), 1); 
+        depression_indices = cell(numel(data), 1);
+        segments_peak_all = cell(numel(data), 1); 
+        segments_depression_all = cell(numel(data), 1); 
         
 
         for datai = 1:numel(data)
             
             data_holder = data{datai}; 
 
-            [peak_indices_intermediate, segments_intermediate ] = SubStrider(data_holder, timeDim, instanceDim, peakMinHeight, peakMinSeparation);
+            [peak_heights_intermediate, peak_indices_intermediate, depression_heights_intermediate, depression_indices_intermediate, segments_peak_intermediate, segments_depression_intermediate ] = SubStrider(data_holder, timeDim, instanceDim, peakMinHeight, peakMinSeparation);    
+            
+            peak_heights(datai) = peak_heights_intermediate;
             peak_indices(datai) = peak_indices_intermediate;
-            segments_all(datai) = segments_intermediate; 
+            depression_heights(datai) = depression_heights_intermediate;
+            depression_indices(datai) = depression_indices_intermediate;
+            segments_peak_all(datai) = segments_peak_intermediate; 
+            segments_depression_all(datai) = segments_depression_intermediate; 
+
         end 
 
         % add another layer of cells to match other periods formatting
+        peak_heights = {peak_heights};
         peak_indices = {peak_indices};
-        segments_all = {segments_all};
+        depression_heights = {depression_heights};
+        depression_indices = {depression_indices};
+        segments_peak_all = {segments_peak_all};
+        segments_depression_all = {segments_depression_all};
 
 
     else 
         % Otherwise, is all other periods
         data_holder = data;
-        [peak_indices, segments_all ] = SubStrider(data_holder, timeDim, instanceDim, peakMinHeight, peakMinSeparation);
+        [peak_heights, peak_indices, depression_heights, depression_indices, segments_peak_all, segments_depression_all ] = SubStrider(data_holder, timeDim, instanceDim, peakMinHeight, peakMinSeparation);
         
     end 
 
-    % Put peak indices into output structure. A
-    parameters.peaks = peak_indices;
+    % Put all results into output structure
+    parameters.peaks.peak_heights = peak_heights;
+    parameters.peaks.peak_indices = peak_indices;
+    parameters.peaks.depression_heights = depression_heights;
+    parameters.peaks.depression_indices = depression_indices;
 
     % Put segmentations into output structure
-    parameters.segmentations = segments_all; 
+    parameters.segmentations_peak = segments_peak_all; 
+    parameters.segmentations_depression = segments_depression_all; 
 
 end 
 
-function [peak_indices, segments_all ] = SubStrider(data_holder, timeDim, instanceDim, peakMinHeight, peakMinSeparation)
+function [peak_heights, peak_indices, depression_heights, depression_indices, segments_peak_all, segments_depression_all ] = SubStrider(data_holder, timeDim, instanceDim, peakMinHeight, peakMinSeparation)
 
     % ***Remove mean from data trace***
 
@@ -96,8 +114,11 @@ function [peak_indices, segments_all ] = SubStrider(data_holder, timeDim, instan
     C = repmat({':'}, 1, ndims(data_meanRemoved));
 
     % Set up output holders
+    peak_heights = cell(size(data_meanRemoved, instanceDim), 1);
+    depression_heights = cell(size(data_meanRemoved, instanceDim), 1);
     peak_indices = cell(size(data_meanRemoved, instanceDim), 1);
     depression_indices = cell(size(data_meanRemoved, instanceDim), 1);
+    
 
     for instancei = 1:size(data_meanRemoved, instanceDim)
         
@@ -106,11 +127,15 @@ function [peak_indices, segments_all ] = SubStrider(data_holder, timeDim, instan
         this_data = data_meanRemoved(C{:});
 
         % Run this instance through peakdet
-        [~, ~, pid1, did1] = peakdet(this_data, peakMinHeight, 'zero', peakMinSeparation);
+        [peak_height, depression_height, pid1, did1] = peakdet(this_data, peakMinHeight, 'zero', peakMinSeparation);
         
         % put into holding variable
+        peak_heights{instancei} = peak_height;
+        depression_heights{instancei} = depression_height;
         peak_indices{instancei} = pid1;
         depression_indices{instancei} = did1;
+
+       
     end 
   
 
@@ -120,7 +145,9 @@ function [peak_indices, segments_all ] = SubStrider(data_holder, timeDim, instan
     C = repmat({':'}, 1, ndims(data_meanRemoved));
 
     % Set up segments holder
-    segments_all = cell(size(data_meanRemoved, instanceDim), 1);
+    segments_peak_all = cell(size(data_meanRemoved, instanceDim), 1);
+    segments_depression_all = cell(size(data_meanRemoved, instanceDim), 1);
+   
    
     for instancei = 1:size(data_meanRemoved, instanceDim)
         
@@ -134,7 +161,13 @@ function [peak_indices, segments_all ] = SubStrider(data_holder, timeDim, instan
         % Segment
         [segments] = SubStrideSegmenter(this_data, this_peaks);
 
-        segments_all{instancei} = segments;
+        segments_peak_all{instancei} = segments;
+
+        % Pull out this instance's depression instances
+        this_depressions = depression_indices{instancei};
+
+        [segments] = SubStrideSegmenter(this_data, this_depressions);
+        segments_depression_all{instancei} = segments;
 
     end 
 end
@@ -154,8 +187,7 @@ function [segments] = SubStrideSegmenter(this_data, this_peaks)
         if iscolumn(holder)
             holder = holder';
         end 
-        segments{peaki} = this_data(this_peaks(peaki):this_peaks(peaki + 1) - 1);
-        
+        segments{peaki} = holder;
     end 
 
 end 
