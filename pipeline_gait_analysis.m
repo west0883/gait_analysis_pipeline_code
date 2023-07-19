@@ -625,8 +625,33 @@ parameters.loop_list.things_to_save.SEM.level = 'period';
 
 RunAnalysis({@PlotMiceStrideAverages}, parameters);
 close all;
-%% Segment HL with FL
-% To find phase differences in FL and HL
-% you can use the depression indices for this
+%% Segment FL, HL, and tail with FL x ranges -- Spontaneous long walk
+% To find phase differences 
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
 
-%% segment tail with depressions from FL
+% Is so you can use a single loop for calculations. 
+parameters.loop_list.iterators = {
+               'paw', {'loop_variables.paws'}, 'paw_iterator';
+               'velocity_direction', {'loop_variables.velocity_directions'}, 'velocity_direction_iterator'
+               'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator';
+                };
+
+parameters.segmentDim = 1;
+parameters.concatDim = 2;
+
+% Inputs
+% timeseries
+parameters.loop_list.things_to_load.timeseries.dir = {[parameters.dir_exper 'behavior\body\concatenated velocity\'], 'paw', '\', 'velocity_direction', '\spontaneous\', 'mouse', '\'};
+parameters.loop_list.things_to_load.timeseries.filename = {'concatenated_velocity_longPeriods_walk.mat'};
+parameters.loop_list.things_to_load.timeseries.variable = {'velocity_all'}; 
+parameters.loop_list.things_to_load.timeseries.level = 'mouse';
+% time ranges
+parameters.loop_list.things_to_load.time_ranges.dir = {[parameters.dir_exper 'behavior\gait analysis\x peaks\all periods\FL\'], 'mouse', '\'};
+parameters.loop_list.things_to_load.time_ranges.filename = {'x_peaks_longWalk_spontaneous.mat'};
+parameters.loop_list.things_to_load.time_ranges.variable = {'x_peaks.depression_ranges'}; 
+parameters.loop_list.things_to_load.time_ranges.level = 'mouse';
+
+RunAnalysis({@StrideSegmentationLooper}, parameters);
+
