@@ -66,6 +66,7 @@ parameters.loop_variables.velocity_directions = {'x', 'y', 'total_magnitude', 't
 parameters.loop_variables.type_tags = {'longWalk_spontaneous', 'longWalk_motorized1600', 'longWalk_motorized2000', 'longWalk_motorized2400', 'longWalk_motorized2800'}; % No "allPeriods" anymore; For concatenated majority of peiods and the long versions of motorized & spontaneous walk
 parameters.loop_variables.motorSpeeds = {'1600', '2000', '2400', '2800'};
 parameters.loop_variables.periods_withLongs = [parameters.periods.condition(1:194); {'walkLong_spon'}; {'walkLong_1600'}; {'walkLong_2000'}; {'walkLong_2400'}; {'walkLong_2800'}];
+parameters.loop_variables.periods_longsOnly = [{'walkLong_spon'}; {'walkLong_1600'}; {'walkLong_2000'}; {'walkLong_2400'}; {'walkLong_2800'}];
 parameters.loop_variables.peak_depression = {'depression'}; % {'peak', 'depression'};
 parameters.loop_variables.paws_sublist = {'HL', 'tail'};
 
