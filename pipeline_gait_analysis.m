@@ -640,6 +640,8 @@ parameters.loop_list.iterators = {
 
 parameters.segmentDim = 1;
 parameters.concatDim = 2;
+parameters.instancesAsCells = true; 
+parameters.uniformSegments = false;
 
 % Inputs
 % timeseries
@@ -650,12 +652,12 @@ parameters.loop_list.things_to_load.timeseries.level = 'mouse';
 % time ranges
 parameters.loop_list.things_to_load.time_ranges.dir = {[parameters.dir_exper 'behavior\gait analysis\x peaks\all periods\FL\'], 'mouse', '\'};
 parameters.loop_list.things_to_load.time_ranges.filename = {'x_peaks_longWalk_spontaneous.mat'};
-parameters.loop_list.things_to_load.time_ranges.variable = {'x_peaks.depression_ranges'}; 
+parameters.loop_list.things_to_load.time_ranges.variable = {'x_peaks.depression_ranges{1}'}; 
 parameters.loop_list.things_to_load.time_ranges.level = 'mouse';
 
 % Outputs
 % segmented timseries
-parameters.loop_list.things_to_save.segmented_timeseries.dir = {[parameters.dir_exper 'behavior\gait analysis\stride segmentationsfrom FL x depressions\all periods\'],'paw', '\', 'velocity_direction', '\' 'mouse', '\'};
+parameters.loop_list.things_to_save.segmented_timeseries.dir = {[parameters.dir_exper 'behavior\gait analysis\stride segmentations from FL x depressions\all periods\'],'paw', '\', 'velocity_direction', '\' 'mouse', '\'};
 parameters.loop_list.things_to_save.segmented_timeseries.filename = {'stride_segmentations_longWalk_spontaneous.mat'};
 parameters.loop_list.things_to_save.segmented_timeseries.variable = {'stride_segmentations_depression'}; 
 parameters.loop_list.things_to_save.segmented_timeseries.level = 'mouse';
@@ -678,6 +680,7 @@ parameters.loop_list.iterators = {
 
 parameters.segmentDim = 1;
 parameters.concatDim = 2;
+parameters.instancesAsCells = true;
 
 % Inputs
 % timeseries
@@ -688,12 +691,12 @@ parameters.loop_list.things_to_load.timeseries.level = 'motorSpeed';
 % time ranges
 parameters.loop_list.things_to_load.time_ranges.dir = {[parameters.dir_exper 'behavior\gait analysis\x peaks\all periods\FL\'], 'mouse', '\'};
 parameters.loop_list.things_to_load.time_ranges.filename = {'x_peaks_longWalk_motorized_', 'motorSpeed', '.mat'};
-parameters.loop_list.things_to_load.time_ranges.variable = {'x_peaks.depression_ranges'}; 
+parameters.loop_list.things_to_load.time_ranges.variable = {'x_peaks.depression_ranges{1}'}; 
 parameters.loop_list.things_to_load.time_ranges.level = 'motorSpeed';
 
 % Outputs
 % segmented timseries
-parameters.loop_list.things_to_save.segmented_timeseries.dir = {[parameters.dir_exper 'behavior\gait analysis\stride segmentationsfrom FL x depressions\all periods\'],'paw', '\', 'velocity_direction', '\' 'mouse', '\'};
+parameters.loop_list.things_to_save.segmented_timeseries.dir = {[parameters.dir_exper 'behavior\gait analysis\stride segmentations from FL x depressions\all periods\'],'paw', '\', 'velocity_direction', '\' 'mouse', '\'};
 parameters.loop_list.things_to_save.segmented_timeseries.filename = {'stride_segmentations_longWalk_motorized', 'motorSpeed', '.mat'};
 parameters.loop_list.things_to_save.segmented_timeseries.variable = {'stride_segmentations_depression'}; 
 parameters.loop_list.things_to_save.segmented_timeseries.level = 'motorSpeed';
