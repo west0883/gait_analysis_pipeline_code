@@ -723,13 +723,13 @@ parameters.concatenate_across_cells = true;
 
 % Inputs
 % data
-parameters.loop_list.things_to_load.data.dir = {[parameters.dir_exper 'behavior\gait analysis\stride segmentationsfrom FL x depressions\all periods\'],'paw', '\', 'velocity_direction', '\' 'mouse', '\'};
+parameters.loop_list.things_to_load.data.dir = {[parameters.dir_exper 'behavior\gait analysis\stride segmentations from FL x depressions\all periods\'],'paw', '\', 'velocity_direction', '\' 'mouse', '\'};
 parameters.loop_list.things_to_load.data.filename = {'stride_segmentations_longWalk_', 'type_tag', '.mat'};
 parameters.loop_list.things_to_load.data.variable = {'stride_segmentations_depression'}; 
 parameters.loop_list.things_to_load.data.level = 'type_tag';
 
 % Outputs
-parameters.loop_list.things_to_save.concatenated_data.dir = {[parameters.dir_exper 'behavior\gait analysis\stride segmentationsfrom FL x depressions\concatenated periods\'],'paw', '\', 'velocity_direction', '\' 'mouse', '\'};
+parameters.loop_list.things_to_save.concatenated_data.dir = {[parameters.dir_exper 'behavior\gait analysis\stride segmentations from FL x depressions\concatenated periods\'],'paw', '\', 'velocity_direction', '\' 'mouse', '\'};
 parameters.loop_list.things_to_save.concatenated_data.filename = {'stride_segmentations.mat'};
 parameters.loop_list.things_to_save.concatenated_data.variable = {'stride_segmentations'}; 
 parameters.loop_list.things_to_save.concatenated_data.level = 'mouse';
