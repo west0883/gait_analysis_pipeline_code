@@ -48,12 +48,21 @@ function [parameters] = GaitResampling(parameters)
     % Create a colormap for beginning to end 
     mymap = jet(size(segmentations_together, 1));
 
+    % get mouse and period for figure titles
+    mouse = parameters.values{strcmp(parameters.keywords, 'mouse')};
+    period = parameters.values{strcmp(parameters.keywords, 'period')};
+    period_iterator = parameters.values{strcmp(parameters.keywords, 'period_iterator')};
+    paw = parameters.values{strcmp(parameters.keywords, 'paw')};
+    velocity_direction = parameters.values{strcmp(parameters.keywords, 'velocity_direction')};
+
+
     % Plot un-resampled strides together
     fig_segmentations_together = figure;
     hold on;
     for i = 1:size(segmentations_together, 1) 
         plot(segmentations_together{i}, 'Color', mymap(i, :));
     end 
+    title(['un-resampled strides, ' mouse ', '  paw, ', ' velocity_direction ', ' period ' ' num2str(period_iterator)], 'Interpreter', 'none'); 
 
     % Plot resampled strides together
     fig_resampled = figure; 
@@ -61,13 +70,15 @@ function [parameters] = GaitResampling(parameters)
     for i = 1:size(segmentations_together, 1) 
          plot(resampled(i, :), 'Color', mymap(i, :));
     end 
-
+    title(['resampled strides, ' mouse ', '  paw, ', ' velocity_direction ', ' period ' ' num2str(period_iterator)], 'Interpreter', 'none'); 
+    
     % Plot mean and std of strides
     fig_average = figure;
     hold on;
     plot(average)
     plot(average + std_dev);
     plot(average - std_dev);
+    title(['mean with std, ' mouse ', '  paw, ', ' velocity_direction ', ' period ' ' num2str(period_iterator)], 'Interpreter', 'none'); 
 
     % Put all output variables into output structure
     parameters.segmentations_together = segmentations_together;
