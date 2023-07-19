@@ -63,7 +63,7 @@ parameters.loop_variables.variable_type = {'response variables', 'correlations'}
 parameters.loop_variables.paws = {'FL', 'HL', 'tail'};
 parameters.loop_variables.body_parts =  {'FR', 'FL', 'HL', 'tail', 'nose', 'eye'};
 parameters.loop_variables.velocity_directions = {'x', 'y', 'total_magnitude', 'total_angle'};
-parameters.loop_variables.type_tags = {'allPeriods',  'longWalk_spontaneous', 'longWalk_motorized1600', 'longWalk_motorized2000', 'longWalk_motorized2400', 'longWalk_motorized2800'}; % For concatenated majority of peiods and the long versions of motorized & spontaneous walk
+parameters.loop_variables.type_tags = {'longWalk_spontaneous', 'longWalk_motorized1600', 'longWalk_motorized2000', 'longWalk_motorized2400', 'longWalk_motorized2800'}; % No "allPeriods" anymore; For concatenated majority of peiods and the long versions of motorized & spontaneous walk
 parameters.loop_variables.motorSpeeds = {'1600', '2000', '2400', '2800'};
 parameters.loop_variables.periods_withLongs = [parameters.periods.condition(1:194); {'walkLong_spon'}; {'walkLong_1600'}; {'walkLong_2000'}; {'walkLong_2400'}; {'walkLong_2800'}];
 parameters.loop_variables.peak_depression = {'depression'}; % {'peak', 'depression'};
@@ -653,5 +653,82 @@ parameters.loop_list.things_to_load.time_ranges.filename = {'x_peaks_longWalk_sp
 parameters.loop_list.things_to_load.time_ranges.variable = {'x_peaks.depression_ranges'}; 
 parameters.loop_list.things_to_load.time_ranges.level = 'mouse';
 
+% Outputs
+% segmented timseries
+parameters.loop_list.things_to_save.segmented_timeseries.dir = {[parameters.dir_exper 'behavior\gait analysis\stride segmentationsfrom FL x depressions\all periods\'],'paw', '\', 'velocity_direction', '\' 'mouse', '\'};
+parameters.loop_list.things_to_save.segmented_timeseries.filename = {'stride_segmentations_longWalk_spontaneous.mat'};
+parameters.loop_list.things_to_save.segmented_timeseries.variable = {'stride_segmentations_depression'}; 
+parameters.loop_list.things_to_save.segmented_timeseries.level = 'mouse';
+
 RunAnalysis({@StrideSegmentationLooper}, parameters);
 
+%% Segment FL, HL, and tail with FL x ranges -- Motorized long walk
+% To find phase differences 
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+% Is so you can use a single loop for calculations. 
+parameters.loop_list.iterators = {
+               'paw', {'loop_variables.paws'}, 'paw_iterator';
+               'velocity_direction', {'loop_variables.velocity_directions'}, 'velocity_direction_iterator'
+               'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator';
+               'motorSpeed', {'loop_variables.motorSpeeds'}, 'motorSpeed_iterator'
+                };
+
+parameters.segmentDim = 1;
+parameters.concatDim = 2;
+
+% Inputs
+% timeseries
+parameters.loop_list.things_to_load.timeseries.dir = {[parameters.dir_exper 'behavior\body\concatenated velocity\'], 'paw', '\', 'velocity_direction', '\motorized\', 'mouse', '\'};
+parameters.loop_list.things_to_load.timeseries.filename = {'concatenated_velocity_longPeriods_walk_', 'motorSpeed', '.mat'};
+parameters.loop_list.things_to_load.timeseries.variable = {'velocity_all'}; 
+parameters.loop_list.things_to_load.timeseries.level = 'motorSpeed';
+% time ranges
+parameters.loop_list.things_to_load.time_ranges.dir = {[parameters.dir_exper 'behavior\gait analysis\x peaks\all periods\FL\'], 'mouse', '\'};
+parameters.loop_list.things_to_load.time_ranges.filename = {'x_peaks_longWalk_motorized_', 'motorSpeed', '.mat'};
+parameters.loop_list.things_to_load.time_ranges.variable = {'x_peaks.depression_ranges'}; 
+parameters.loop_list.things_to_load.time_ranges.level = 'motorSpeed';
+
+% Outputs
+% segmented timseries
+parameters.loop_list.things_to_save.segmented_timeseries.dir = {[parameters.dir_exper 'behavior\gait analysis\stride segmentationsfrom FL x depressions\all periods\'],'paw', '\', 'velocity_direction', '\' 'mouse', '\'};
+parameters.loop_list.things_to_save.segmented_timeseries.filename = {'stride_segmentations_longWalk_motorized', 'motorSpeed', '.mat'};
+parameters.loop_list.things_to_save.segmented_timeseries.variable = {'stride_segmentations_depression'}; 
+parameters.loop_list.things_to_save.segmented_timeseries.level = 'motorSpeed';
+
+RunAnalysis({@StrideSegmentationLooper}, parameters);
+
+%% Body parts segmented with FL x: Concatenate 
+
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+% Is so you can use a single loop for calculations. 
+parameters.loop_list.iterators = {
+               'paw', {'loop_variables.paws'}, 'paw_iterator';
+               'velocity_direction', {'loop_variables.velocity_directions'}, 'velocity_direction_iterator'
+               'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator';
+               'type_tag', {'loop_variables.type_tags'}, 'type_tag_iterator'
+                };
+
+parameters.concatDim = 1;
+parameters.concatenation_level = 'type_tag';
+parameters.concatenate_across_cells = true;
+
+% Inputs
+% data
+parameters.loop_list.things_to_load.data.dir = {[parameters.dir_exper 'behavior\gait analysis\stride segmentationsfrom FL x depressions\all periods\'],'paw', '\', 'velocity_direction', '\' 'mouse', '\'};
+parameters.loop_list.things_to_load.data.filename = {'stride_segmentations_longWalk_', 'type_tag', '.mat'};
+parameters.loop_list.things_to_load.data.variable = {'stride_segmentations_depression'}; 
+parameters.loop_list.things_to_load.data.level = 'type_tag';
+
+% Outputs
+parameters.loop_list.things_to_save.concatenated_data.dir = {[parameters.dir_exper 'behavior\gait analysis\stride segmentationsfrom FL x depressions\concatenated periods\'],'paw', '\', 'velocity_direction', '\' 'mouse', '\'};
+parameters.loop_list.things_to_save.concatenated_data.filename = {'stride_segmentations.mat'};
+parameters.loop_list.things_to_save.concatenated_data.variable = {'stride_segmentations'}; 
+parameters.loop_list.things_to_save.concatenated_data.level = 'mouse';
+
+RunAnalysis({@ConcatenateData}, parameters);
