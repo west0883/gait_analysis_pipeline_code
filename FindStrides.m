@@ -124,20 +124,20 @@ function [peak_heights, peak_indices, depression_heights, depression_indices, ..
     % Find if there's more than one instance/velocity trace in this matrix,
         
     % set up dimensions holder
-    C = repmat({':'}, 1, ndims(data_meanRemoved));
+    C = repmat({':'}, 1, ndims(data_holder));
 
     % Set up output holders
-    peak_heights = cell(size(data_meanRemoved, instanceDim), 1);
-    depression_heights = cell(size(data_meanRemoved, instanceDim), 1);
-    peak_indices = cell(size(data_meanRemoved, instanceDim), 1);
-    depression_indices = cell(size(data_meanRemoved, instanceDim), 1);
+    peak_heights = cell(size(data_holder, instanceDim), 1);
+    depression_heights = cell(size(data_holder, instanceDim), 1);
+    peak_indices = cell(size(data_holder, instanceDim), 1);
+    depression_indices = cell(size(data_holder, instanceDim), 1);
     
 
-    for instancei = 1:size(data_meanRemoved, instanceDim)
+    for instancei = 1:size(data_holder, instanceDim)
         
         % Pull out this instance's data
         C{instanceDim} = instancei;
-        this_data = data_meanRemoved(C{:});
+        this_data = data_holder(C{:});
 
         % Run this instance through peakdet
         [peak_height, depression_height, pid1, did1] = peakdet(this_data, peakMinHeight, 'zero', peakMinSeparation);
@@ -153,21 +153,22 @@ function [peak_heights, peak_indices, depression_heights, depression_indices, ..
   
 
     % *** Segment velocity traces by stride ***
+    % Do NOT used mean data-- use original
 
     % set up dimensions holder
-    C = repmat({':'}, 1, ndims(data_meanRemoved));
+    C = repmat({':'}, 1, ndims(data_holder));
 
     % Set up segments holder
-    segments_peak_all = cell(size(data_meanRemoved, instanceDim), 1);
-    segments_depression_all = cell(size(data_meanRemoved, instanceDim), 1);
-    peak_ranges = cell(size(data_meanRemoved, instanceDim), 1);
-    depression_ranges = cell(size(data_meanRemoved, instanceDim), 1);
+    segments_peak_all = cell(size(data_holder, instanceDim), 1);
+    segments_depression_all = cell(size(data_holder, instanceDim), 1);
+    peak_ranges = cell(size(data_holder, instanceDim), 1);
+    depression_ranges = cell(size(data_holder, instanceDim), 1);
    
-    for instancei = 1:size(data_meanRemoved, instanceDim)
+    for instancei = 1:size(data_holder, instanceDim)
         
         % Pull out this instance's data
         C{instanceDim} = instancei;
-        this_data = data_meanRemoved(C{:});
+        this_data = data_holder(C{:});
 
         % Pull out this instance's peak indices
         this_peaks = peak_indices{instancei};
