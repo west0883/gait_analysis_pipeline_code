@@ -49,8 +49,22 @@ function [parameters] = PlotMiceStrideOverlays(parameters)
         period = parameters.values{strcmp(parameters.keywords, 'period')};
         period_iterator = parameters.values{strcmp(parameters.keywords, 'period_iterator')};
 
+        if any(strcmp(parameters.keywords, 'paw'))
+            paw = parameters.values{strcmp(parameters.keywords, 'paw')};
+            paw_section = [ paw ', '];
+        else
+            paw_section = [];
+        end 
+
+        if any(strcmp(parameters.keywords, 'velocity_direction'))
+            velocity_direction = parameters.values{strcmp(parameters.keywords, 'velocity_direction')};
+            velocity_direction_section = [ velocity_direction ', '];
+        else
+            velocity_direction_section = [];
+        end 
+
         % Make figure title 
-        title(['mean with SEM, ' period ' ' num2str(period_iterator)], 'Interpreter', 'none');
+        title(['mean with std_dev, ' paw_section velocity_direction_section period ' ' num2str(period_iterator)], 'Interpreter', 'none');
 
     % If it has been created, pull it out of the parameters structure
     else
@@ -78,10 +92,10 @@ function [parameters] = PlotMiceStrideOverlays(parameters)
     % grab the color for the lines
     this_color = mymap(mouse_iterator, :); 
 
-    % Plot the average and shaded error bars
-    s = shadedErrorBar(1:10, average, SEM, 'lineProps', {'-','color', this_color}, 'patchSaturation', 0.2);
+    % Plot the average and shaded error bars % S
+    s = shadedErrorBar(1:10, average, std_dev , 'lineProps', {'-','color', this_color}, 'patchSaturation', 0.2);
     delete(s.edge); % delete shaded area edges
-    set(s.mainLine, 'LineWidth', 1);
+    set(s.mainLine, 'LineWidth', 2);
    
     % Set the y axis limits
     ylim(ylimits);

@@ -62,7 +62,20 @@ function [parameters] = PlotMiceStrideAverages(parameters)
     ylim(ylimits);
 
     % Make figure title 
-    title(['mean with SEM, ' period ' ' num2str(period_iterator)], 'Interpreter', 'none');
+    if any(strcmp(parameters.keywords, 'paw'))
+        paw = parameters.values{strcmp(parameters.keywords, 'paw')};
+        paw_section = [ paw ', '];
+    else
+        paw_section = [];
+    end 
+    
+    if any(strcmp(parameters.keywords, 'velocity_direction'))
+        velocity_direction = parameters.values{strcmp(parameters.keywords, 'velocity_direction')};
+        velocity_direction_section = [ velocity_direction ', '];
+    else
+        velocity_direction_section = [];
+    end 
+    title(['mean with SEM, ' paw_section velocity_direction_section period ' ' num2str(period_iterator)], 'Interpreter', 'none');
 
     % Put the output figure into outputs
     parameters.fig = fig;
