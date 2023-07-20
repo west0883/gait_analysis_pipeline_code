@@ -1533,8 +1533,18 @@ RunAnalysis({@AverageCircularData}, parameters);
 parameters.useWeights = false;
 
 %% Find stride durations (from stride velocity segmentations)
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
 
-
+% Don't need to do different segmentation methods or velocity directions (just do x of each paw)
+parameters.loop_list.iterators = {
+               'paw', {'loop_variables.paws'}, 'paw_iterator';
+               'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator';
+               'period', {'loop_variables.periods_longsOnly'}, 'period_iterator';
+               }; 
+% Use this (for each paw): 
+load('Y:\Sarah\Analysis\Experiments\Random Motorized Treadmill\behavior\gait analysis\stride segmentations\from depressions\concatenated periods\FL\1087\stride_segmentations_together.mat');
 %% Segment positions 
 
 
