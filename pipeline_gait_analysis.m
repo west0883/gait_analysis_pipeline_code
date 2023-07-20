@@ -1297,13 +1297,13 @@ end
 % Is so you can use a single loop for calculations. 
 parameters.loop_list.iterators = {
                'paw', {'loop_variables.paws_sublist'}, 'paw_iterator'; % iterate through HL and tail only
-               'velocity_direction', {'loop_variables.velocity_directions_sublist'}, 'velocity_direction_iterator'
                'period', {'loop_variables.periods_longsOnly'}, 'period_iterator';
                'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator';
                }; 
 
 parameters.isLongWalk = true;
 parameters.fillMissing_window = 10; % The width of the window to run 'movmean' over in the 'fillmissing' step
+parameters.minimumLength = 60; % The minimum length of the timeseries to try to calculate phase on (3 seconds)
 
 % Inputs 
 % reference (FL x)
@@ -1324,3 +1324,9 @@ parameters.loop_list.things_to_save.phase_differences.variable = {'velocity_all'
 parameters.loop_list.things_to_save.phase_differences.level = 'mouse';
 
 RunAnalysis({@FindPhaseDifference}, parameters);
+
+
+%% get lenghts of the long velocity segments
+% so when you average the phase differences, you can weight by the length
+% of the walking segment
+
