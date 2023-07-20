@@ -69,6 +69,7 @@ parameters.loop_variables.periods_withLongs = [parameters.periods.condition(1:19
 parameters.loop_variables.periods_longsOnly = [{'walkLong_spon'}; {'walkLong_1600'}; {'walkLong_2000'}; {'walkLong_2400'}; {'walkLong_2800'}];
 parameters.loop_variables.peak_depression = {'depression'}; % {'peak', 'depression'};
 parameters.loop_variables.velocity_directions_sublist = {'y', 'total_magnitude', 'total_angle'};
+parameters.loop_variables.paws_sublist =  {'HL', 'tail'};
 
 parameters.average_and_std_together = false;
 
