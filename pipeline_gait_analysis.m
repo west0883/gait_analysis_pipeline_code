@@ -1130,6 +1130,8 @@ parameters.loop_list.things_to_save.fig_average.level = 'period';
 
 RunAnalysis({@GaitResampling}, parameters);
 
+parameters.closeFigures = false;
+
 %% Own x segmentations: Plot all mices' averages of each period together
 
 if isfield(parameters, 'loop_list')
