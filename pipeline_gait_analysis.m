@@ -1285,4 +1285,42 @@ parameters.loop_list.things_to_save.SEM.level = 'period';
 RunAnalysis({@PlotMiceStrideAverages}, parameters);
 close all;
 
-%% run phase difference detections with phdiffmeasure
+%% run phase difference detections with phdiffmeasure -- spontaneous
+% use fillmissing Matlab build-in function first ('movmean', 10)
+
+% Compare HL and tail x to FL x. (tail x is larger on average than tail y... or at least I didn't segment based on y depressions) 
+
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+% Is so you can use a single loop for calculations. 
+parameters.loop_list.iterators = {
+               'paw', {'loop_variables.paws_sublist'}, 'paw_iterator'; % iterate through HL and tail only
+               'velocity_direction', {'loop_variables.velocity_directions_sublist'}, 'velocity_direction_iterator'
+               'period', {'loop_variables.periods_longsOnly'}, 'period_iterator';
+               'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator';
+               }; 
+
+parameters.isLongWalk = true;
+parameters.fillMissing_window = 10; % The width of the window to run 'movmean' over in the 'fillmissing' step
+
+% Inputs 
+% reference (FL x)
+parameters.loop_list.things_to_load.reference.dir = {[parameters.dir_exper 'behavior\body\concatenated velocity\FL\x\spontaneous\'], 'mouse', '\'};
+parameters.loop_list.things_to_load.reference.filename = {'concatenated_velocity_longPeriods_walk.mat'};
+parameters.loop_list.things_to_load.reference.variable = {'velocity_all'}; 
+parameters.loop_list.things_to_load.reference.level = 'mouse';
+% compare to (other paw x)
+parameters.loop_list.things_to_load.data.dir = {[parameters.dir_exper 'behavior\body\concatenated velocity\'], 'paw', '\x\spontaneous\', 'mouse', '\'};
+parameters.loop_list.things_to_load.data.filename = {'concatenated_velocity_longPeriods_walk.mat'};
+parameters.loop_list.things_to_load.data.variable = {'velocity_all'}; 
+parameters.loop_list.things_to_load.data.level = 'mouse';
+
+% Outputs
+parameters.loop_list.things_to_save.phase_differences.dir = {[parameters.dir_exper 'behavior\body\gait analysis\phase difference\'], 'paw', '\', 'mouse', '\'};
+parameters.loop_list.things_to_save.phase_differences.filename = {'phaseDifference_walkLong_spon.mat'};
+parameters.loop_list.things_to_save.phase_differences.variable = {'velocity_all'}; 
+parameters.loop_list.things_to_save.phase_differences.level = 'mouse';
+
+RunAnalysis({@FindPhaseDifference}, parameters);
