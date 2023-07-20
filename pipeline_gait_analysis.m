@@ -70,6 +70,8 @@ parameters.loop_variables.periods_longsOnly = [{'walkLong_spon'}; {'walkLong_160
 parameters.loop_variables.peak_depression = {'depression'}; % {'peak', 'depression'};
 parameters.loop_variables.velocity_directions_sublist = {'y', 'total_magnitude', 'total_angle'};
 parameters.loop_variables.paws_sublist =  {'HL', 'tail'};
+parameters.loop_variables.segmentation_types =  {'stride segmentations', 'stride segmentations from FL x depressions', 'stride segmentations from own x depressions'};
+parameters.loop_variables.data_type =  {'velocity', 'position'};
 
 parameters.average_and_std_together = false;
 
@@ -1365,14 +1367,8 @@ parameters.loop_list.things_to_save.phase_differences.level = 'motorSpeed';
 
 RunAnalysis({@FindPhaseDifference}, parameters);
 
-%% DON'T DO THIS--get lengths of the long velocity segments
-% so when you average the phase differences, you can weight by the length
-% of the walking segment
-% DON'T DO -- is probably best to keep each sample weighted equally by long
-% instance
 
 %% Phases: Concatenate
-
 if isfield(parameters, 'loop_list')
 parameters = rmfield(parameters,'loop_list');
 end
@@ -1403,7 +1399,9 @@ parameters.loop_list.things_to_save.concatenated_data.level = 'mouse';
 
 RunAnalysis({@ConcatenateData}, parameters);
 
-%% Phases: Average within mouse using circular statistics
+%% Get lengths of the long velocity segments: Spontaneous
+% so when you average the phase differences, you can weight by the length
+% of the walking segment
 
 if isfield(parameters, 'loop_list')
 parameters = rmfield(parameters,'loop_list');
@@ -1411,31 +1409,137 @@ end
 
 % Is so you can use a single loop for calculations. 
 parameters.loop_list.iterators = {
-               'paw', {'loop_variables.paws'}, 'paw_iterator';
+               'paw', {'loop_variables.paws_sublist'}, 'paw_iterator'; % iterate through HL and tail only
+               'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator';
+               }; 
+
+parameters.evaluation_instructions = {{'data_evaluated  = {cellfun("size", parameters.data, 1)};'}};
+% Inputs 
+parameters.loop_list.things_to_load.data.dir = {[parameters.dir_exper 'behavior\body\concatenated velocity\'], 'paw', '\x\spontaneous\', 'mouse', '\'};
+parameters.loop_list.things_to_load.data.filename = {'concatenated_velocity_longPeriods_walk.mat'};
+parameters.loop_list.things_to_load.data.variable = {'velocity_all'}; 
+parameters.loop_list.things_to_load.data.level = 'mouse';
+
+% Outputs
+parameters.loop_list.things_to_save.data_evaluated.dir = {[parameters.dir_exper 'behavior\gait analysis\phase difference\'], 'paw', '\', 'mouse', '\'};
+parameters.loop_list.things_to_save.data_evaluated.filename = {'istanceLengths_longWalk_spontaneous.mat'};
+parameters.loop_list.things_to_save.data_evaluated.variable = {'lengths'}; 
+parameters.loop_list.things_to_save.data_evaluated.level = 'mouse';
+
+RunAnalysis({@EvaluateOnData}, parameters);
+
+%% Get lengths of the long velocity segments: Motorized
+% so when you average the phase differences, you can weight by the length
+% of the walking segment
+
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+% Is so you can use a single loop for calculations. 
+parameters.loop_list.iterators = {
+               'paw', {'loop_variables.paws_sublist'}, 'paw_iterator'; % iterate through HL and tail only
+               'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator';
+               'motorSpeed', {'loop_variables.motorSpeeds'}, 'motorSpeed_iterator'
+               }; 
+
+parameters.evaluation_instructions = {{'data_evaluated  = {cellfun("size", parameters.data, 1)};'}};
+% Inputs 
+parameters.loop_list.things_to_load.data.dir = {[parameters.dir_exper 'behavior\body\concatenated velocity\'], 'paw', '\x\motorized\', 'mouse', '\'};
+parameters.loop_list.things_to_load.data.filename = {'concatenated_velocity_longPeriods_walk_', 'motorSpeed', '.mat'};
+parameters.loop_list.things_to_load.data.variable = {'velocity_all'}; 
+parameters.loop_list.things_to_load.data.level = 'motorSpeed';
+
+% Outputs
+parameters.loop_list.things_to_save.data_evaluated.dir = {[parameters.dir_exper 'behavior\gait analysis\phase difference\'], 'paw', '\', 'mouse', '\'};
+parameters.loop_list.things_to_save.data_evaluated.filename = {'istanceLengths_longWalk_motorized', 'motorSpeed', '.mat'};
+parameters.loop_list.things_to_save.data_evaluated.variable = {'lengths'}; 
+parameters.loop_list.things_to_save.data_evaluated.level = 'motorSpeed';
+
+RunAnalysis({@EvaluateOnData}, parameters);
+
+%% Lengths: Concatenate
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+% Is so you can use a single loop for calculations. 
+parameters.loop_list.iterators = {
+               'paw', {'loop_variables.paws_sublist'}, 'paw_iterator';
+               'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator';
+               'type_tag', {'loop_variables.type_tags'}, 'type_tag_iterator'
+                };
+
+parameters.concatDim = 1;
+parameters.concatenation_level = 'type_tag';
+parameters.concatenate_across_cells = true;
+
+% Inputs
+% data
+parameters.loop_list.things_to_load.data.dir = {[parameters.dir_exper 'behavior\gait analysis\phase difference\'],'paw', '\', 'mouse', '\'};
+parameters.loop_list.things_to_load.data.filename = {'istanceLengths_', 'type_tag', '.mat'};
+parameters.loop_list.things_to_load.data.variable = {'lengths'}; 
+parameters.loop_list.things_to_load.data.level = 'type_tag';
+
+% Outputs
+parameters.loop_list.things_to_save.concatenated_data.dir = {[parameters.dir_exper 'behavior\gait analysis\phase difference\'],'paw', '\', 'mouse', '\'};
+parameters.loop_list.things_to_save.concatenated_data.filename = {'instanceLengths_concatenated.mat'};
+parameters.loop_list.things_to_save.concatenated_data.variable = {'lengths_all'}; 
+parameters.loop_list.things_to_save.concatenated_data.level = 'mouse';
+
+RunAnalysis({@ConcatenateData}, parameters);
+
+
+%% Phases: Average within mouse using circular statistics
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+% Is so you can use a single loop for calculations. 
+parameters.loop_list.iterators = {
+               'paw', {'loop_variables.paws_sublist'}, 'paw_iterator';
                'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator';
                'period', {'loop_variables.periods_longsOnly'}, 'period_iterator';
                }; 
 
-% close each figure after saving it
-parameters.closeFigures = true;
-% the number of timepoints to resample each stride velocity segment to.
-parameters.resampleLength = 10; % to 0.5 s = 10 time points
+parameters.averageDim = 1;
+parameters.useWeights = true;
 
 % Inputs
+% data
 parameters.loop_list.things_to_load.data.dir = {[parameters.dir_exper 'behavior\gait analysis\phase difference\'],'paw', '\', 'mouse', '\'};
-parameters.loop_list.things_to_load.data.filename = {'phaseDifferences_concatenated.mat'};
-parameters.loop_list.things_to_load.data.variable = {'phaseDifference{', 'period_iterator', '}'}; 
+parameters.loop_list.things_to_load.data.filename = {'phaseDifference_concatenated.mat'};
+parameters.loop_list.things_to_load.data.variable = {'phase_difference{', 'period_iterator', '}'}; 
 parameters.loop_list.things_to_load.data.level = 'mouse';
+% weights
+parameters.loop_list.things_to_load.weights.dir = {[parameters.dir_exper 'behavior\gait analysis\phase difference\'],'paw', '\', 'mouse', '\'};
+parameters.loop_list.things_to_load.weights.filename = {'instanceLengths_concatenated.mat'};
+parameters.loop_list.things_to_load.weights.variable = {'lengths_all{', 'period_iterator', '}'}; 
+parameters.loop_list.things_to_load.weights.level = 'mouse';
 
 % Outputs
 parameters.loop_list.things_to_save.average.dir = {[parameters.dir_exper 'behavior\gait analysis\phase difference\'],'paw', '\', 'mouse', '\'};
 parameters.loop_list.things_to_save.average.filename = {'within_mouse_average.mat'};
-parameters.loop_list.things_to_save.average.variable = {'average{', 'period_iterator', '}'}; 
+parameters.loop_list.things_to_save.average.variable = {'average{', 'period_iterator', ', 1}'}; 
 parameters.loop_list.things_to_save.average.level = 'mouse';
 
 parameters.loop_list.things_to_save.std_dev.dir = {[parameters.dir_exper 'behavior\gait analysis\phase difference\'],'paw', '\', 'mouse', '\'};
 parameters.loop_list.things_to_save.std_dev.filename = {'within_mouse_std_dev.mat'};
-parameters.loop_list.things_to_save.std_dev.variable = {'std_dev{', 'period_iterator', '}'}; 
+parameters.loop_list.things_to_save.std_dev.variable = {'std_dev{', 'period_iterator', ', 1}'}; 
 parameters.loop_list.things_to_save.std_dev.level = 'mouse';
 
 RunAnalysis({@AverageCircularData}, parameters);
+
+parameters.useWeights = false;
+
+%% Find stride durations (from stride velocity segmentations)
+
+
+%% Segment positions 
+
+
+%% Get stride lengths (from stride position segmentations)
+
+
+
+%% 
