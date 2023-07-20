@@ -127,10 +127,11 @@ function [phase_difference] = SubPhaseDifference(reference, data, fillMissing_wi
                 phase_diff_holder(i) = phdiffmeasure(reference_filled(segments{i}), data_filled(segments{i}));
             end 
 
-            % Take average weighted by lengths of segments 
+            % Take average weighted by lengths of segments, using circular
+            % statistics 
             weights = cellfun(@numel, segments) ./ sum(cellfun(@numel, segments));
 
-            phase_difference = mean(phase_diff_holder .* weights');
+            phase_difference = circ_mean(phase_diff_holder, weights');
             
         end 
     
