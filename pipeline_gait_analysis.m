@@ -59,19 +59,21 @@ parameters.loop_variables.mice_all = parameters.mice_all;
 parameters.loop_variables.periods = parameters.periods.condition(1:194); % Don't include full_onset & full_offset 
 parameters.loop_variables.conditions = {'motorized'; 'spontaneous'};
 parameters.loop_variables.conditions_stack_locations = {'stacks'; 'spontaneous'};
+parameters.loop_variables.conditions_stack_locations_long = {'spontaneous', 'stacks', 'stacks', 'stacks', 'stacks'}; 
 parameters.loop_variables.variable_type = {'response variables', 'correlations'};
 parameters.loop_variables.paws =  {'FL', 'HL', 'tail'};
-parameters.loop_variables.body_parts =  {'FR', 'FL', 'HL', 'tail', 'nose', 'eye'};
+parameters.loop_variables.body_parts = {'HL', 'tail', 'nose', 'eye'}; % {'FR', 'FL', 'HL', 'tail', 'nose', 'eye'};
 parameters.loop_variables.velocity_directions = {'x', 'y', 'total_magnitude', 'total_angle'};
 parameters.loop_variables.type_tags = {'longWalk_spontaneous', 'longWalk_motorized1600', 'longWalk_motorized2000', 'longWalk_motorized2400', 'longWalk_motorized2800'}; % No "allPeriods" anymore; For concatenated majority of peiods and the long versions of motorized & spontaneous walk
+parameters.loop_variables.type_tags2 = {'longWalk_spontaneous', 'longWalk_motorized_1600', 'longWalk_motorized_2000', 'longWalk_motorized_2400', 'longWalk_motorized2800'};
 parameters.loop_variables.motorSpeeds = {'1600', '2000', '2400', '2800'};
 parameters.loop_variables.periods_withLongs = [parameters.periods.condition(1:194); {'walkLong_spon'}; {'walkLong_1600'}; {'walkLong_2000'}; {'walkLong_2400'}; {'walkLong_2800'}];
 parameters.loop_variables.periods_longsOnly = [{'walkLong_spon'}; {'walkLong_1600'}; {'walkLong_2000'}; {'walkLong_2400'}; {'walkLong_2800'}];
 parameters.loop_variables.peak_depression = {'depression'}; % {'peak', 'depression'};
 parameters.loop_variables.velocity_directions_sublist = {'y', 'total_magnitude', 'total_angle'};
 parameters.loop_variables.paws_sublist =  {'HL', 'tail'};
-parameters.loop_variables.segmentation_types =  {'stride segmentations', 'stride segmentations from FL x depressions', 'stride segmentations from own x depressions'};
-parameters.loop_variables.data_type =  {'velocity', 'position'};
+parameters.loop_variables.segmentation_types =  { 'stride segmentations from own x depressions', 'stride segmentations from FL x depressions'};
+parameters.loop_variables.position_directions = {x, y};
 
 parameters.average_and_std_together = false;
 
@@ -369,7 +371,7 @@ parameters.loop_list.things_to_load.data.level = 'motorSpeed';
 % Outputs
 % peaks
 parameters.loop_list.things_to_save.peaks.dir = {[parameters.dir_exper 'behavior\gait analysis\x peaks\all periods\'],'paw', '\', 'mouse', '\'};
-parameters.loop_list.things_to_save.peaks.filename = {'x_peaks_longWalk_motorized_', 'motorSpeed', '.mat'};
+parameters.loop_list.things_to_save.peaks.filename = {'x_peaks_longWalk_motorized', 'motorSpeed', '.mat'};
 parameters.loop_list.things_to_save.peaks.variable = {'x_peaks'}; 
 parameters.loop_list.things_to_save.peaks.level = 'motorSpeed';
 % velocities segmented into strides from peaks
@@ -481,7 +483,7 @@ parameters.loop_list.things_to_save.fig_average.variable = {'fig'};
 parameters.loop_list.things_to_save.fig_average.level = 'period';
 
 RunAnalysis({@GaitResampling}, parameters);
-
+parameters.closeFigures = false;
 %% Plot all mices' averages of each period together
 
 if isfield(parameters, 'loop_list')
@@ -695,7 +697,7 @@ parameters.loop_list.things_to_load.timeseries.variable = {'velocity_all'};
 parameters.loop_list.things_to_load.timeseries.level = 'motorSpeed';
 % time ranges
 parameters.loop_list.things_to_load.time_ranges.dir = {[parameters.dir_exper 'behavior\gait analysis\x peaks\all periods\FL\'], 'mouse', '\'};
-parameters.loop_list.things_to_load.time_ranges.filename = {'x_peaks_longWalk_motorized_', 'motorSpeed', '.mat'};
+parameters.loop_list.things_to_load.time_ranges.filename = {'x_peaks_longWalk_motorized', 'motorSpeed', '.mat'};
 parameters.loop_list.things_to_load.time_ranges.variable = {'x_peaks.depression_ranges{1}'}; 
 parameters.loop_list.things_to_load.time_ranges.level = 'motorSpeed';
 
@@ -1024,7 +1026,7 @@ parameters.loop_list.things_to_load.timeseries.variable = {'velocity_all'};
 parameters.loop_list.things_to_load.timeseries.level = 'motorSpeed';
 % time ranges
 parameters.loop_list.things_to_load.time_ranges.dir = {[parameters.dir_exper 'behavior\gait analysis\x peaks\all periods\'], 'paw', '\', 'mouse', '\'};
-parameters.loop_list.things_to_load.time_ranges.filename = {'x_peaks_longWalk_motorized_', 'motorSpeed', '.mat'};
+parameters.loop_list.things_to_load.time_ranges.filename = {'x_peaks_longWalk_motorized', 'motorSpeed', '.mat'};
 parameters.loop_list.things_to_load.time_ranges.variable = {'x_peaks.depression_ranges{1}'}; 
 parameters.loop_list.things_to_load.time_ranges.level = 'motorSpeed';
 
@@ -1543,13 +1545,359 @@ parameters.loop_list.iterators = {
                'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator';
                'period', {'loop_variables.periods_longsOnly'}, 'period_iterator';
                }; 
-% Use this (for each paw): 
-load('Y:\Sarah\Analysis\Experiments\Random Motorized Treadmill\behavior\gait analysis\stride segmentations\from depressions\concatenated periods\FL\1087\stride_segmentations_together.mat');
-%% Segment positions 
 
+parameters.evaluation_instructions = {{'data_evaluated = cellfun(@numel, parameters.data);'}};
+
+% Inputs
+parameters.loop_list.things_to_load.data.dir = {[parameters.dir_exper 'behavior\gait analysis\stride segmentations\from depressions\concatenated periods\'],'paw', '\', 'mouse', '\'};
+parameters.loop_list.things_to_load.data.filename = {'stride_segmentations_together', '.mat'};
+parameters.loop_list.things_to_load.data.variable = {'stride_segmentations_together{', 'period_iterator', ', 1}'}; 
+parameters.loop_list.things_to_load.data.level = 'mouse';
+
+% Outputs
+parameters.loop_list.things_to_save.data_evaluated.dir = {[parameters.dir_exper 'behavior\gait analysis\stride durations\'],'paw', '\', 'mouse', '\'};
+parameters.loop_list.things_to_save.data_evaluated.filename = {'stride_durations', '.mat'};
+parameters.loop_list.things_to_save.data_evaluated.variable = {'stride_durations{', 'period_iterator', ', 1}'}; 
+parameters.loop_list.things_to_save.data_evaluated.level = 'mouse';
+
+RunAnalysis({@EvaluateOnData}, parameters);
+
+%% Stride durations: plot histograms
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+parameters.loop_list.iterators = {
+               'paw', {'loop_variables.paws'}, 'paw_iterator';
+               'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator';
+               'period', {'loop_variables.periods_longsOnly'}, 'period_iterator';
+               }; 
+
+parameters.bin_edges = 0:1:60;
+
+% Inputs
+parameters.loop_list.things_to_load.data.dir = {[parameters.dir_exper 'behavior\gait analysis\stride durations\'],'paw', '\', 'mouse', '\'};
+parameters.loop_list.things_to_load.data.filename = {'stride_durations', '.mat'};
+parameters.loop_list.things_to_load.data.variable = {'stride_durations{', 'period_iterator', ', 1}'}; 
+parameters.loop_list.things_to_load.data.level = 'mouse';
+
+% Outputs
+parameters.loop_list.things_to_save.fig.dir = {[parameters.dir_exper 'behavior\gait analysis\stride durations\'],'paw', '\', 'mouse', '\'};
+parameters.loop_list.things_to_save.fig.filename = {'stride_durations_', 'period', '_', 'period_iterator', '.fig'};
+parameters.loop_list.things_to_save.fig.variable = {'fig'}; 
+parameters.loop_list.things_to_save.fig.level = 'period';
+
+RunAnalysis({@StrideDurationHistograms}, parameters);
+
+close all;
+
+%% *** Stride durations: fancy plots might do the mean within and across mice in Prism Graphpad ***
+
+
+%% Segment positiosn by behavior period (long walk periods)-- Spontaneous
+
+% (similar to paw_velocity_pipeline_code.m)
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+% Iterators
+parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'; 
+               'day', {'loop_variables.mice_all(', 'mouse_iterator', ').days(:).name'}, 'day_iterator';
+                   'stack', {'loop_variables.mice_all(',  'mouse_iterator', ').days(', 'day_iterator', ').spontaneous'}, 'stack_iterator';
+                   'body_part', {'loop_variables.body_parts'}, 'body_part_iterator';
+                   'velocity_direction', {'loop_variables.velocity_directions'}, 'velocity_direction_iterator' };
+
+% Skip any files that don't exist (spontaneous or problem files)
+parameters.load_abort_flag = true; 
+
+% Dimension of different time range pairs.
+parameters.rangePairs = 1; 
+
+% 
+parameters.segmentDim = 1;
+parameters.concatDim = 2;
+
+% Are the segmentations the same length? (If false, will put outputs into
+% cell array)
+parameters.uniformSegments = false;
+
+% Input values. 
+% Extracted timeseries.
+parameters.loop_list.things_to_load.timeseries.dir = {[parameters.dir_exper 'behavior\body\paw position\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_load.timeseries.filename= {'position', 'stack', '.mat'};
+parameters.loop_list.things_to_load.timeseries.variable= {'position.', 'body_part', '.', 'velocity_direction'}; 
+parameters.loop_list.things_to_load.timeseries.level = 'stack';
+% Time ranges
+parameters.loop_list.things_to_load.time_ranges.dir = {[parameters.dir_exper 'behavior\spontaneous\segmented behavior periods\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_load.time_ranges.filename= {'long_periods_', 'stack', '.mat'};
+parameters.loop_list.things_to_load.time_ranges.variable= {'long_periods.walk'}; 
+parameters.loop_list.things_to_load.time_ranges.level = 'stack';
+
+% Output Values
+parameters.loop_list.things_to_save.segmented_timeseries.dir = {[parameters.dir_exper 'behavior\body\segmented positions\'], 'body_part', '\', 'velocity_direction', '\', 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_save.segmented_timeseries.filename= {'segmented_timeseries_longWalk_spontaneous', '_', 'stack', '.mat'};
+parameters.loop_list.things_to_save.segmented_timeseries.variable= {'segmented_timeseries'}; 
+parameters.loop_list.things_to_save.segmented_timeseries.level = 'velocity_direction';
+
+RunAnalysis({@SegmentTimeseriesData}, parameters);
+
+%% Segment positiosn by behavior period (long walk periods)-- Motorized
+
+% (similar to paw_velocity_pipeline_code.m)
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+% Iterators
+parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'; 
+               'day', {'loop_variables.mice_all(', 'mouse_iterator', ').days(:).name'}, 'day_iterator';
+                   'stack', {'loop_variables.mice_all(',  'mouse_iterator', ').days(', 'day_iterator', ').stacks'}, 'stack_iterator';
+                   'body_part', {'loop_variables.body_parts'}, 'body_part_iterator';
+                   'velocity_direction', {'loop_variables.velocity_directions'}, 'velocity_direction_iterator' ;
+                   'motorSpeed', {'loop_variables.motorSpeeds'}, 'motorSpeed_iterator';
+                   };
+
+% Skip any files that don't exist (spontaneous or problem files)
+parameters.load_abort_flag = true; 
+
+% Dimension of different time range pairs.
+parameters.rangePairs = 1; 
+
+% 
+parameters.segmentDim = 1;
+parameters.concatDim = 2;
+
+% Are the segmentations the same length? (If false, will put outputs into
+% cell array)
+parameters.uniformSegments = false;
+
+% Input values. 
+% Extracted timeseries.
+parameters.loop_list.things_to_load.timeseries.dir = {[parameters.dir_exper 'behavior\body\paw position\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_load.timeseries.filename= {'position', 'stack', '.mat'};
+parameters.loop_list.things_to_load.timeseries.variable= {'position.', 'body_part', '.', 'velocity_direction'}; 
+parameters.loop_list.things_to_load.timeseries.level = 'stack';
+% Time ranges
+parameters.loop_list.things_to_load.time_ranges.dir = {[parameters.dir_exper 'behavior\motorized\period instances\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_load.time_ranges.filename= {'long_periods_', 'stack', '.mat'};
+parameters.loop_list.things_to_load.time_ranges.variable= {'long_periods.walk_', 'motorSpeed'}; 
+parameters.loop_list.things_to_load.time_ranges.level = 'stack';
+
+% Output Values
+parameters.loop_list.things_to_save.segmented_timeseries.dir = {[parameters.dir_exper 'behavior\body\segmented positions\'], 'body_part', '\', 'velocity_direction', '\', 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_save.segmented_timeseries.filename= {'segmented_timeseries_longWalk_motorized', 'motorSpeed', '_', 'stack', '.mat'};
+parameters.loop_list.things_to_save.segmented_timeseries.variable= {'segmented_timeseries'}; 
+parameters.loop_list.things_to_save.segmented_timeseries.level = 'motorSpeed';
+
+RunAnalysis({@SegmentTimeseriesData}, parameters);
+
+%% Concatenate positions (long walk periods)
+% use type_tag to avoid separating spon & motorized
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+% Iterators
+parameters.loop_list.iterators = {
+                   'body_part', {'loop_variables.body_parts'}, 'body_part_iterator';
+                   'velocity_direction', {'loop_variables.velocity_directions'}, 'velocity_direction_iterator';
+                   'type_tag', {'loop_variables.type_tags'}, 'type_tag_iterator';
+                   'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'; 
+                   'day', {'loop_variables.mice_all(', 'mouse_iterator', ').days(:).name'}, 'day_iterator';
+                   'stack', {'getfield(loop_variables, {1}, "mice_all", {',  'mouse_iterator', '}, "days", {', 'day_iterator', '}, ', 'loop_variables.conditions_stack_locations_long{', 'type_tag_iterator', '})'}, 'stack_iterator'; 
+                   };
+
+parameters.concatDim = 1;
+parameters.concatenate_across_cells = true;
+
+% Inputs 
+parameters.loop_list.things_to_load.data.dir = {[parameters.dir_exper 'behavior\body\segmented positions\'], 'body_part', '\', 'velocity_direction', '\', 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_load.data.filename= {'segmented_timeseries_', 'type_tag', '_', 'stack', '.mat'};
+parameters.loop_list.things_to_load.data.variable= {'segmented_timeseries'}; 
+parameters.loop_list.things_to_load.data.level = 'stack';
+
+% Outputs
+parameters.loop_list.things_to_save.concatenated_data.dir = {[parameters.dir_exper 'behavior\body\concatenated positions\'], 'body_part', '\', 'velocity_direction', '\', 'mouse', '\'};
+parameters.loop_list.things_to_save.concatenated_data.filename = {'concatenated_positions_', 'type_tag', '.mat'};
+parameters.loop_list.things_to_save.concatenated_data.variable = {'position_all'}; 
+parameters.loop_list.things_to_save.concatenated_data.level = 'mouse';
+
+RunAnalysis({@ConcatenateData}, parameters);
+
+%% Segment positions by stride -- own x-direction 
+% To find stride lengths in space/distance 
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+% Is so you can use a single loop for calculations. 
+parameters.loop_list.iterators = {
+               'paw', {'loop_variables.paws'}, 'paw_iterator';
+               'velocity_direction', {'loop_variables.velocity_directions'}, 'velocity_direction_iterator'
+               'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator';
+               'type_tag', {'loop_variables.type_tags'}, 'type_tag_iterator';
+                };
+
+parameters.segmentDim = 1;
+parameters.concatDim = 2;
+parameters.instancesAsCells = true; 
+parameters.uniformSegments = false;
+parameters.add_extra_cell_layer = false;
+
+% Inputs
+% timeseries
+parameters.loop_list.things_to_load.timeseries.dir = {[parameters.dir_exper 'behavior\body\concatenated positions\'], 'paw', '\', 'velocity_direction', '\', 'mouse', '\'};
+parameters.loop_list.things_to_load.timeseries.filename = {'concatenated_positions_', 'type_tag', '.mat'};
+parameters.loop_list.things_to_load.timeseries.variable = {'position_all'}; 
+parameters.loop_list.things_to_load.timeseries.level = 'type_tag';
+%time ranges
+parameters.loop_list.things_to_load.time_ranges.dir = {[parameters.dir_exper 'behavior\gait analysis\x peaks\all periods\'], 'paw', '\', 'mouse', '\'};
+parameters.loop_list.things_to_load.time_ranges.filename = {'x_peaks_', 'type_tag', '.mat'};
+parameters.loop_list.things_to_load.time_ranges.variable = {'x_peaks.depression_ranges{1}'}; 
+parameters.loop_list.things_to_load.time_ranges.level = 'type_tag';
+
+% Outputs
+% segmented timseries
+parameters.loop_list.things_to_save.segmented_timeseries.dir = {[parameters.dir_exper 'behavior\gait analysis\position strides from own x depressions\all periods\'],'paw', '\', 'velocity_direction', '\' 'mouse', '\'};
+parameters.loop_list.things_to_save.segmented_timeseries.filename = {'stride_segmentations.mat'};
+parameters.loop_list.things_to_save.segmented_timeseries.variable = {'stride_segmentations_depression{', 'type_tag_iterator', ', 1}'}; 
+parameters.loop_list.things_to_save.segmented_timeseries.level = 'mouse';
+
+RunAnalysis({@StrideSegmentationLooper}, parameters);
+
+%% Segment positions by stride -- FL x (might not do?)
+
+%% plot position strides
+% plot x vs y 
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+% Is so you can use a single loop for calculations. 
+parameters.loop_list.iterators = {
+               'paw', {'loop_variables.paws'}, 'paw_iterator';
+               'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator';
+               'type_tag', {'loop_variables.type_tags'}, 'type_tag_iterator';
+                };
+parameters.resampleLength = 10;
+parameters.closeFigures = true;
+% Inputs
+% x data
+parameters.loop_list.things_to_load.x.dir = {[parameters.dir_exper 'behavior\gait analysis\position strides from own x depressions\all periods\'],'paw', '\x\' 'mouse', '\'};
+parameters.loop_list.things_to_load.x.filename = {'stride_segmentations.mat'};
+parameters.loop_list.things_to_load.x.variable = {'stride_segmentations_depression{', 'type_tag_iterator', ', 1}'}; 
+parameters.loop_list.things_to_load.x.level = 'mouse';
+% y data
+parameters.loop_list.things_to_load.y.dir = {[parameters.dir_exper 'behavior\gait analysis\position strides from own x depressions\all periods\'],'paw', '\y\' 'mouse', '\'};
+parameters.loop_list.things_to_load.y.filename = {'stride_segmentations.mat'};
+parameters.loop_list.things_to_load.y.variable = {'stride_segmentations_depression{', 'type_tag_iterator', ', 1}'}; 
+parameters.loop_list.things_to_load.y.level = 'mouse';
+
+% Outputs
+parameters.loop_list.things_to_save.x_together.dir = {[parameters.dir_exper 'behavior\gait analysis\position strides from own x depressions\figures\'],'paw', '\y\' 'mouse', '\'};
+parameters.loop_list.things_to_save.x_together.filename = {'stride_segmentations_x_together.mat'};
+parameters.loop_list.things_to_save.x_together.variable = {'stride_segmentations_x_together{', 'type_tag_iterator', ', 1}'}; 
+parameters.loop_list.things_to_save.x_together.level = 'mouse';
+
+parameters.loop_list.things_to_save.y_together.dir = {[parameters.dir_exper 'behavior\gait analysis\position strides from own x depressions\figures\'],'paw', '\y\' 'mouse', '\'};
+parameters.loop_list.things_to_save.y_together.filename = {'stride_segmentations_y_together.mat'};
+parameters.loop_list.things_to_save.y_together.variable = {'stride_segmentations_y_together{', 'type_tag_iterator', ', 1}'}; 
+parameters.loop_list.things_to_save.y_together.level = 'mouse';
+
+parameters.loop_list.things_to_save.x_resampled.dir = {[parameters.dir_exper 'behavior\gait analysis\position strides from own x depressions\figures\'],'paw', '\y\' 'mouse', '\'};
+parameters.loop_list.things_to_save.x_resampled.filename = {'stride_segmentations_x_resampled.mat'};
+parameters.loop_list.things_to_save.x_resampled.variable = {'stride_segmentations_x_resampled{', 'type_tag_iterator', ', 1}'}; 
+parameters.loop_list.things_to_save.x_resampled.level = 'mouse';
+
+parameters.loop_list.things_to_save.y_resampled.dir = {[parameters.dir_exper 'behavior\gait analysis\position strides from own x depressions\figures\'],'paw', '\y\' 'mouse', '\'};
+parameters.loop_list.things_to_save.y_resampled.filename = {'stride_segmentations_y_resampled.mat'};
+parameters.loop_list.things_to_save.y_resampled.variable = {'stride_segmentations_y_resampled{', 'type_tag_iterator', ', 1}'}; 
+parameters.loop_list.things_to_save.y_resampled.level = 'mouse';
+
+parameters.loop_list.things_to_save.average.dir = {[parameters.dir_exper 'behavior\gait analysis\position strides from own x depressions\figures\'],'paw', '\y\' 'mouse', '\'};
+parameters.loop_list.things_to_save.average.filename = {'stride_segmentations_average.mat'};
+parameters.loop_list.things_to_save.average.variable = {'stride_segmentations_average{', 'type_tag_iterator', ', 1}'}; 
+parameters.loop_list.things_to_save.average.level = 'mouse';
+
+parameters.loop_list.things_to_save.std_dev.dir = {[parameters.dir_exper 'behavior\gait analysis\position strides from own x depressions\figures\'],'paw', '\y\' 'mouse', '\'};
+parameters.loop_list.things_to_save.std_dev.filename = {'stride_segmentations_std_dev.mat'};
+parameters.loop_list.things_to_save.std_dev.variable = {'stride_segmentations_std_dev{', 'type_tag_iterator', ', 1}'}; 
+parameters.loop_list.things_to_save.std_dev.level = 'mouse';
+
+parameters.loop_list.things_to_save.fig_positions_together.dir = {[parameters.dir_exper 'behavior\gait analysis\position strides from own x depressions\figures\'],'paw', '\y\' 'mouse', '\'};
+parameters.loop_list.things_to_save.fig_positions_together.filename = {'stride_segmentations_together.fig'};
+parameters.loop_list.things_to_save.fig_positions_together.variable = {'fig_positions_together'}; 
+parameters.loop_list.things_to_save.fig_positions_together.level = 'type_tag';
+
+parameters.loop_list.things_to_save.fig_resampled.dir = {[parameters.dir_exper 'behavior\gait analysis\position strides from own x depressions\figures\'],'paw', '\y\' 'mouse', '\'};
+parameters.loop_list.things_to_save.fig_resampled.filename = {'stride_segmentations_resampled.fig'};
+parameters.loop_list.things_to_save.fig_resampled.variable = {'fig_resampled'}; 
+parameters.loop_list.things_to_save.fig_resampled.level = 'type_tag';
+
+parameters.loop_list.things_to_save.fig_average.dir = {[parameters.dir_exper 'behavior\gait analysis\position strides from own x depressions\figures\'],'paw', '\y\' 'mouse', '\'};
+parameters.loop_list.things_to_save.fig_average.filename = {'stride_segmentations_average.fig'};
+parameters.loop_list.things_to_save.fig_average.variable = {'fig_average'}; 
+parameters.loop_list.things_to_save.fig_average.level = 'type_tag';
+
+RunAnalysis({@PlotStridePosition}, parameters);
+
+parameters.closeFigures = false;
 
 %% Get stride lengths (from stride position segmentations)
+% load stride_positions_together
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
 
+% Is so you can use a single loop for calculations. 
+parameters.loop_list.iterators = {
+               'paw', {'loop_variables.paws'}, 'paw_iterator';
+               'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator';
+               'type_tag', {'loop_variables.type_tags'}, 'type_tag_iterator';
+                };
 
+parameters.evaluation_instructions = {{'data_evaluated = cellfun( @range, parameters.data);'}};
+% Input
+parameters.loop_list.things_to_load.data.dir = {[parameters.dir_exper 'behavior\gait analysis\position strides from own x depressions\figures\'],'paw', '\y\' 'mouse', '\'};
+parameters.loop_list.things_to_load.data.filename = {'stride_segmentations_x_together.mat'};
+parameters.loop_list.things_to_load.data.variable = {'stride_segmentations_x_together{', 'type_tag_iterator', ', 1}'}; 
+parameters.loop_list.things_to_load.data.level = 'mouse';
 
-%% 
+% Outputs
+parameters.loop_list.things_to_save.data_evaluated.dir = {[parameters.dir_exper 'behavior\gait analysis\position strides from own x depressions\figures\'],'paw', '\' 'mouse', '\'};
+parameters.loop_list.things_to_save.data_evaluated.filename = {'stride_lengths.mat'};
+parameters.loop_list.things_to_save.data_evaluated.variable = {'stride_lengths{', 'type_tag_iterator', ', 1}'}; 
+parameters.loop_list.things_to_save.data_evaluated.level = 'mouse';
+
+RunAnalysis({@EvaluateOnData}, parameters);
+
+%% Stride lengths: plot histograms
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+parameters.loop_list.iterators = {
+               'paw', {'loop_variables.paws'}, 'paw_iterator';
+               'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator';
+               'period', {'loop_variables.periods_longsOnly'}, 'period_iterator';
+               }; 
+
+parameters.bin_edges = 0:2:200;
+parameters.title_string = 'lengths';
+
+% Inputs
+parameters.loop_list.things_to_load.data.dir = {[parameters.dir_exper 'behavior\gait analysis\position strides from own x depressions\figures\'],'paw', '\' 'mouse', '\'};
+parameters.loop_list.things_to_load.data.filename = {'stride_lengths', '.mat'};
+parameters.loop_list.things_to_load.data.variable = {'stride_lengths{', 'period_iterator', ', 1}'}; 
+parameters.loop_list.things_to_load.data.level = 'mouse';
+
+% Outputs
+parameters.loop_list.things_to_save.fig.dir = {[parameters.dir_exper 'behavior\gait analysis\stride lengths\'],'paw', '\', 'mouse', '\'};
+parameters.loop_list.things_to_save.fig.filename = {'stride_lengths_', 'period', '_', 'period_iterator', '.fig'};
+parameters.loop_list.things_to_save.fig.variable = {'fig'}; 
+parameters.loop_list.things_to_save.fig.level = 'period';
+
+RunAnalysis({@StrideDurationHistograms}, parameters);
+
+close all;
