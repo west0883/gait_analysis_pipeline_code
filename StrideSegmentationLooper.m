@@ -37,7 +37,9 @@ function [parameters] = StrideSegmentationLooper(parameters)
         end
         
         % add another layer of cells to match other periods formatting
-        segmentations_all = {segmentations_all};
+        if ~isfield(parameters, 'add_extra_cell_layer') ||  (isfield(parameters, 'add_extra_cell_layer') && parameters.add_extra_cell_layer)
+            segmentations_all = {segmentations_all};
+        end
   
     % Otherwise, is all other periods
     else
