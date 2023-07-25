@@ -53,7 +53,7 @@ function [parameters] = GaitResampling(parameters)
     period = parameters.values{strcmp(parameters.keywords, 'period')};
     period_iterator = parameters.values{strcmp(parameters.keywords, 'period_iterator')};
     paw = parameters.values{strcmp(parameters.keywords, 'paw')};
-    velocity_direction = parameters.values{strcmp(parameters.keywords, 'velocity_direction')};
+    %velocity_direction = parameters.values{strcmp(parameters.keywords, 'velocity_direction')};
 
 
     % Plot un-resampled strides together
@@ -62,6 +62,7 @@ function [parameters] = GaitResampling(parameters)
     for i = 1:size(segmentations_together, 1) 
         plot(segmentations_together{i}, 'Color', mymap(i, :));
     end 
+    velocity_direction = [];
     title(['un-resampled strides, ' mouse ', '  paw, ', ' velocity_direction ', ' period ' ' num2str(period_iterator)], 'Interpreter', 'none'); 
 
     % Plot resampled strides together
